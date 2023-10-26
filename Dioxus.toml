@@ -1,0 +1,74 @@
+[application]
+
+# dioxus project name
+name = "coven"
+
+# default platfrom
+# you can also use `dx serve/build --platform XXX` to use other platform
+# value: web | desktop
+default_platform = "desktop"
+
+# Web `build` & `serve` dist path
+out_dir = "dist"
+
+# resource (static) file folder
+asset_dir = "public"
+
+[web.app]
+
+# HTML title tag content
+title = "Coven | p2p chat"
+
+[web.watcher]
+
+index_on_404 = true
+
+watch_path = ["src"]
+
+# include `assets` in web platform
+[web.resource]
+
+# CSS style file
+style = []
+
+# Javascript code file
+script = []
+
+[web.resource.dev]
+
+# Javascript code file
+# serve: [dev-server] only
+script = []
+
+[application.plugins]
+
+available = true
+
+required = []
+
+[bundler]
+# Bundle identifier
+identifier = "chat.cabal.coven"
+
+# Bundle publisher
+publisher = "coven"
+
+# Bundle icon
+icon = ["icons/icon.png"]
+
+# Bundle resources
+resources = ["public/*"]
+
+# Bundle copyright
+copyright = ""
+
+# Bundle category
+category = "Chat"
+
+# Bundle short description
+short_description = "An occult chat app using Cabal"
+
+# Bundle long description
+long_description = """
+An occult chat app using Cabal, the experimental p2p community chat platform.
+"""

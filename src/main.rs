@@ -1,17 +1,61 @@
 #![allow(non_snake_case)]
-// import the prelude to get access to the `rsx!` macro and the `Scope` and `Element` types
+
 use dioxus::prelude::*;
+use dioxus_router::prelude::*;
+
+// TODO provide service as root context
+// - https://github.com/DioxusLabs/dioxus/pull/1193/files
 
 fn main() {
-    // launch the dioxus app in a webview
-    dioxus_desktop::launch(App);
+    dioxus_desktop::launch(App)
 }
 
-// define a component that renders a div with the text "Hello, world!"
+#[derive(Routable, Clone)]
+#[rustfmt::skip]
+enum Route {
+    #[route("/")]
+    AppHome {},
+    #[nest("/cabal/:cabal_id")]
+        #[route("/")]
+        CabalHome {
+            cabal_id: String,
+        },
+        #[route("/channel/:channel_id")]
+        CabalChannel {
+            cabal_id: String,
+            channel_id: String
+        },
+}
+
 fn App(cx: Scope) -> Element {
-    cx.render(rsx! {
+    render! {
+        Router::<Route> {}
+    }
+}
+
+#[inline_props]
+fn AppHome(cx: Scope) -> Element {
+    render! {
         div {
-            "Hello, worlddddddddd!"
+            "Home"
         }
-    })
+    }
+}
+
+#[inline_props]
+fn CabalHome(cx: Scope, cabal_id: String) -> Element {
+    render! {
+        div {
+            "Cabal Home"
+        }
+    }
+}
+
+#[inline_props]
+fn CabalChannel(cx: Scope, cabal_id: String, channel_id: String) -> Element {
+    render! {
+        div {
+            "Cabal Channel"
+        }
+    }
 }
