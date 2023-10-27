@@ -7,15 +7,13 @@ edition = "2021"
 
 [dependencies]
 anyhow = "1.0.75"
+async-std = { version = "1.12.0", features = ["tokio1"] }
 cable = { git = "https://github.com/cabal-club/cable.rs" }
 cable_core = { git = "https://github.com/cabal-club/cable.rs" }
-derive_more = "0.99.17"
 dioxus = "0.4.0"
 dioxus-desktop = "0.4.0"
 dioxus-router = "0.4.1"
 dirs = "5.0.1"
 fermi = "0.4.0"
 nest = "1.0.0"
-quic-rpc = { version = "0.6.1", features = ["flume-transport"] }
-serde = "1.0.190"
 tokio = "1.33.0"

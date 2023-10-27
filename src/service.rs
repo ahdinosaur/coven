@@ -1,83 +1,76 @@
-use std::collections::{HashMap, HashSet};
+// TODO refactor like https://dioxuslabs.com/docs/nightly/guide/en/async/use_coroutine.html#sending-values
 
-use cable_core::{CableManager, MemoryStore, Store};
-use derive_more::{From, TryInto};
-use quic_rpc::{message::RpcMsg, transport::flume, RpcClient, RpcServer, Service};
-use serde::{Deserialize, Serialize};
+use async_std::{
+    net::{TcpListener, TcpStream},
+    stream::StreamExt,
+};
+use std::collections::HashMap;
 
-#[derive(Debug, Serialize, Deserialize)]
-pub struct Ping;
+use anyhow::anyhow;
+use cable_core::{CableManager, Store};
 
-#[derive(Debug, Serialize, Deserialize)]
-pub struct Pong;
-
-#[derive(Debug, Clone)]
-pub struct CovenService;
-
-#[derive(Debug, Serialize, Deserialize, From, TryInto)]
-pub enum CovenRequest {
-    Ping(Ping),
-}
-
-#[derive(Debug, Serialize, Deserialize, From, TryInto)]
-pub enum CovenResponse {
-    Pong(Pong),
-}
-
-impl Service for CovenService {
-    type Req = CovenRequest;
-    type Res = CovenResponse;
-}
-
-impl RpcMsg<CovenService> for Ping {
-    type Response = Pong;
-}
-
-pub type Client = RpcClient<CovenService, flume::FlumeConnection<CovenResponse, CovenRequest>>;
-
-pub fn start_service() -> Result<Client, anyhow::Error> {
-    let (server, client) = flume::connection::<CovenRequest, CovenResponse>(1);
-
-    let client = RpcClient::<CovenService, _>::new(client);
-    let server = RpcServer::<CovenService, _>::new(server);
-
-    tokio::task::spawn(async move {
-        let mut handler = Handler::new();
-        loop {
-            let (msg, chan) = server.accept().await.unwrap();
-            match msg {
-                CovenRequest::Ping(ping) => chan.rpc(ping, handler, Handler::ping).await.unwrap(),
-            }
-        }
-    });
-
-    Ok(client)
-}
-
-type PeerAddress = Vec<u8>;
-
-/// A TCP connection and associated address (host:post).
-#[derive(Debug, Clone, Hash, Eq, PartialEq)]
-enum Connection {
-    Connected(String),
-    Listening(String),
-}
+type CableAddr = Vec<u8>;
+type TcpAddr = String;
 
 #[derive(Clone)]
-struct Handler {
-    cables: HashMap<PeerAddress, CableManager<MemoryStore>>,
-    connections: HashSet<Connection>,
+struct Service<S: Store + Default> {
+    cables: HashMap<CableAddr, CableManager<S>>,
 }
 
-impl Handler {
-    fn new() -> Self {
+impl<S: Store + Default> Default for Service<S> {
+    fn default() -> Self {
         Self {
             cables: HashMap::new(),
-            connections: HashSet::new(),
         }
     }
+}
 
-    async fn ping(self, _req: Ping) -> Pong {
-        Pong
+impl<S: Store + Default> Service<S> {
+    pub fn get_cable(&self, cable_addr: &CableAddr) -> Option<&CableManager<S>> {
+        self.cables.get(cable_addr)
+    }
+
+    pub fn get_cable_mut(&self, cable_addr: &CableAddr) -> Option<&mut CableManager<S>> {
+        self.cables.get_mut(cable_addr)
+    }
+
+    pub fn add_cable(&mut self, cable_addr: &CableAddr) {
+        self.cables
+            .insert(cable_addr.to_vec(), CableManager::new(S::default()));
+    }
+
+    pub async fn connect(
+        &mut self,
+        cable_addr: &CableAddr,
+        tcp_addr: String,
+    ) -> anyhow::Result<()> {
+        let stream = TcpStream::connect(tcp_addr).await?;
+        let cable = self.get_cable(cable_addr).unwrap();
+        cable
+            .listen(stream)
+            .await
+            .map_err(|err| anyhow!("{}", err))?;
+        Ok(())
+    }
+
+    pub async fn listen(&mut self, cable_addr: &CableAddr, tcp_addr: String) {
+        // Format the TCP address if a host was not supplied.
+        if !tcp_addr.contains(':') {
+            tcp_addr = format!("0.0.0.0:{}", tcp_addr);
+        }
+
+        let listener = TcpListener::bind(tcp_addr.clone()).await.unwrap();
+
+        let mut incoming = listener.incoming();
+        while let Some(stream) = incoming.next().await {
+            if let Ok(stream) = stream {
+                let cable = cable.clone();
+                tokio::spawn(async move {
+                    if let Err(err) = cable.listen(stream).await {
+                        error!("Cable stream listener error: {}", err);
+                    }
+                });
+            }
+        }
     }
 }
