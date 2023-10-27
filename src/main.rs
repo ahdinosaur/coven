@@ -34,8 +34,8 @@ enum Route {
         },
 }
 
-fn use_client(cx: Scope) -> Rc<RefCell<Client>> {
-    use_context::<Rc<RefCell<Client>>>(cx).unwrap().clone()
+fn use_client(cx: Scope) -> Client {
+    use_context::<Client>(cx).unwrap().clone()
 }
 
 fn App(cx: Scope) -> Element {
@@ -51,7 +51,7 @@ fn AppHome(cx: Scope) -> Element {
     let client = use_client(cx);
 
     use_future!(cx, || async move {
-        let res = client.borrow_mut().rpc(Ping).await.unwrap();
+        let res = client.rpc(Ping).await.unwrap();
         println!("pong: {:?}", res);
     });
 

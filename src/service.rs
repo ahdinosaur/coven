@@ -33,7 +33,7 @@ impl RpcMsg<CovenService> for Ping {
 
 pub type Client = RpcClient<CovenService, flume::FlumeConnection<PingResponse, PingRequest>>;
 
-pub fn start_service() -> Result<Rc<RefCell<Client>>, anyhow::Error> {
+pub fn start_service() -> Result<Client, anyhow::Error> {
     let (server, client) = flume::connection::<PingRequest, PingResponse>(1);
 
     let client = RpcClient::<CovenService, _>::new(client);
@@ -49,7 +49,7 @@ pub fn start_service() -> Result<Rc<RefCell<Client>>, anyhow::Error> {
         }
     });
 
-    Ok(Rc::new(RefCell::new(client)))
+    Ok(client)
 }
 
 #[derive(Debug, Clone, Copy)]
