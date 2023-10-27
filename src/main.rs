@@ -1,7 +1,14 @@
 #![allow(non_snake_case)]
 
+use std::{
+    cell::{RefCell, RefMut},
+    rc::Rc,
+};
+
+use coven::service::{start_service, Client, Ping};
 use dioxus::prelude::*;
 use dioxus_router::prelude::*;
+// use dioxus_signals;
 
 // TODO provide service as root context
 // - https://github.com/DioxusLabs/dioxus/pull/1193/files
@@ -27,14 +34,27 @@ enum Route {
         },
 }
 
+fn use_client(cx: Scope) -> Rc<RefCell<Client>> {
+    use_context::<Rc<RefCell<Client>>>(cx).unwrap().clone()
+}
+
 fn App(cx: Scope) -> Element {
+    use_context_provider(cx, || start_service().unwrap());
+
     render! {
         Router::<Route> {}
     }
 }
 
-#[inline_props]
+#[component]
 fn AppHome(cx: Scope) -> Element {
+    let client = use_client(cx);
+
+    use_future!(cx, || async move {
+        let res = client.borrow_mut().rpc(Ping).await.unwrap();
+        println!("pong: {:?}", res);
+    });
+
     render! {
         div {
             "Home"
@@ -42,7 +62,7 @@ fn AppHome(cx: Scope) -> Element {
     }
 }
 
-#[inline_props]
+#[component]
 fn CabalHome(cx: Scope, cabal_id: String) -> Element {
     render! {
         div {
@@ -51,7 +71,7 @@ fn CabalHome(cx: Scope, cabal_id: String) -> Element {
     }
 }
 
-#[inline_props]
+#[component]
 fn CabalChannel(cx: Scope, cabal_id: String, channel_id: String) -> Element {
     render! {
         div {

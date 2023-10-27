@@ -1,1 +1,1 @@
-mod service;
+pub mod service;
