@@ -6,7 +6,6 @@ use async_std::{
 };
 use std::collections::HashMap;
 
-use anyhow::anyhow;
 use cable_core::{CableManager, Store};
 
 type CableAddr = Vec<u8>;
@@ -39,25 +38,31 @@ impl<S: Store + Default> Service<S> {
             .insert(cable_addr.to_vec(), CableManager::new(S::default()));
     }
 
-    pub async fn connect(
-        &mut self,
-        cable_addr: &CableAddr,
-        tcp_addr: String,
-    ) -> anyhow::Result<()> {
-        let stream = TcpStream::connect(tcp_addr).await?;
-        let cable = self.get_cable(cable_addr).unwrap();
-        cable
-            .listen(stream)
-            .await
-            .map_err(|err| anyhow!("{}", err))?;
-        Ok(())
+    pub async fn connect(&self, cable_addr: &CableAddr, tcp_addr: &TcpAddr) {
+        let cable = self.get_cable(&cable_addr).unwrap().clone();
+        let tcp_addr = tcp_addr.clone();
+        tokio::spawn(async move {
+            let stream = match TcpStream::connect(&tcp_addr).await {
+                Ok(stream) => stream,
+                Err(err) => {
+                    println!("Unable to connect to: {}, Error: {}", &tcp_addr, err);
+                    return;
+                }
+            };
+            if let Err(err) = cable.listen(stream).await {
+                println!("Error listening to stream: {}", err)
+            }
+        });
     }
 
-    pub async fn listen(&mut self, cable_addr: &CableAddr, tcp_addr: String) {
-        // Format the TCP address if a host was not supplied.
-        if !tcp_addr.contains(':') {
-            tcp_addr = format!("0.0.0.0:{}", tcp_addr);
-        }
+    pub async fn listen(&mut self, cable_addr: &CableAddr, tcp_addr: &TcpAddr) {
+        let cable = self.get_cable(cable_addr).unwrap();
+
+        let tcp_addr = if !tcp_addr.contains(':') {
+            format!("0.0.0.0:{}", tcp_addr)
+        } else {
+            tcp_addr.clone()
+        };
 
         let listener = TcpListener::bind(tcp_addr.clone()).await.unwrap();
 
@@ -67,7 +72,7 @@ impl<S: Store + Default> Service<S> {
                 let cable = cable.clone();
                 tokio::spawn(async move {
                     if let Err(err) = cable.listen(stream).await {
-                        error!("Cable stream listener error: {}", err);
+                        println!("Cable stream listener error: {}", err);
                     }
                 });
             }
