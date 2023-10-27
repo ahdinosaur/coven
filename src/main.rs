@@ -1,16 +1,10 @@
 #![allow(non_snake_case)]
 
-use std::{
-    cell::{RefCell, RefMut},
-    rc::Rc,
-};
-
-use coven::{
-    service::{start_service, Client, Ping},
-    state::use_service_provider,
-};
+use cable_core::MemoryStore;
+use coven::service::create_service;
 use dioxus::prelude::*;
 use dioxus_router::prelude::*;
+use fermi::{use_atom_root, use_init_atom_root};
 
 fn main() {
     dioxus_desktop::launch(App)
@@ -34,14 +28,15 @@ enum Route {
 }
 
 fn App(cx: Scope) -> Element {
-    use_service_provider(cx);
+    let atoms = use_init_atom_root(cx);
+    use_coroutine(cx, |rx| create_service::<MemoryStore>(rx, atoms.clone()));
 
     render! {
         Router::<Route> {}
     }
 }
 
-#[component]
+#[inline_props]
 fn AppHome(cx: Scope) -> Element {
     render! {
         div {
@@ -50,7 +45,7 @@ fn AppHome(cx: Scope) -> Element {
     }
 }
 
-#[component]
+#[inline_props]
 fn CabalHome(cx: Scope, cabal_id: String) -> Element {
     render! {
         div {
@@ -59,7 +54,7 @@ fn CabalHome(cx: Scope, cabal_id: String) -> Element {
     }
 }
 
-#[component]
+#[inline_props]
 fn CabalChannel(cx: Scope, cabal_id: String, channel_id: String) -> Element {
     render! {
         div {

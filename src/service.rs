@@ -1,15 +1,45 @@
 // TODO refactor like https://dioxuslabs.com/docs/nightly/guide/en/async/use_coroutine.html#sending-values
 
-use async_std::{
-    net::{TcpListener, TcpStream},
-    stream::StreamExt,
-};
-use std::collections::HashMap;
-
+use async_std::net::{TcpListener, TcpStream};
 use cable_core::{CableManager, Store};
+use dioxus::prelude::UnboundedReceiver;
+use fermi::AtomRoot;
+use futures_util::stream::StreamExt;
+use std::{collections::HashMap, rc::Rc};
 
 type CableAddr = Vec<u8>;
 type TcpAddr = String;
+
+pub enum Command {
+    Connect {
+        cable_addr: CableAddr,
+        tcp_addr: TcpAddr,
+    },
+    Listen {
+        cable_addr: CableAddr,
+        tcp_addr: TcpAddr,
+    },
+}
+
+pub async fn create_service<S: Store + Default>(
+    mut rx: UnboundedReceiver<Command>,
+    _atoms: Rc<AtomRoot>,
+) {
+    let mut service = Service::<S>::default();
+
+    while let Some(cmd) = rx.next().await {
+        match cmd {
+            Command::Connect {
+                cable_addr,
+                tcp_addr,
+            } => service.handle_connect(cable_addr, tcp_addr).await,
+            Command::Listen {
+                cable_addr,
+                tcp_addr,
+            } => service.handle_listen(cable_addr, tcp_addr).await,
+        }
+    }
+}
 
 #[derive(Clone)]
 struct Service<S: Store + Default> {
@@ -25,22 +55,8 @@ impl<S: Store + Default> Default for Service<S> {
 }
 
 impl<S: Store + Default> Service<S> {
-    pub fn get_cable(&self, cable_addr: &CableAddr) -> Option<&CableManager<S>> {
-        self.cables.get(cable_addr)
-    }
-
-    pub fn get_cable_mut(&self, cable_addr: &CableAddr) -> Option<&mut CableManager<S>> {
-        self.cables.get_mut(cable_addr)
-    }
-
-    pub fn add_cable(&mut self, cable_addr: &CableAddr) {
-        self.cables
-            .insert(cable_addr.to_vec(), CableManager::new(S::default()));
-    }
-
-    pub async fn connect(&self, cable_addr: &CableAddr, tcp_addr: &TcpAddr) {
+    async fn handle_connect(&self, cable_addr: CableAddr, tcp_addr: TcpAddr) {
         let cable = self.get_cable(&cable_addr).unwrap().clone();
-        let tcp_addr = tcp_addr.clone();
         tokio::spawn(async move {
             let stream = match TcpStream::connect(&tcp_addr).await {
                 Ok(stream) => stream,
@@ -55,14 +71,12 @@ impl<S: Store + Default> Service<S> {
         });
     }
 
-    pub async fn listen(&mut self, cable_addr: &CableAddr, tcp_addr: &TcpAddr) {
-        let cable = self.get_cable(cable_addr).unwrap();
+    async fn handle_listen(&mut self, cable_addr: CableAddr, mut tcp_addr: TcpAddr) {
+        let cable = self.get_cable(&cable_addr).unwrap();
 
-        let tcp_addr = if !tcp_addr.contains(':') {
-            format!("0.0.0.0:{}", tcp_addr)
-        } else {
-            tcp_addr.clone()
-        };
+        if !tcp_addr.contains(':') {
+            tcp_addr = format!("0.0.0.0:{}", tcp_addr);
+        }
 
         let listener = TcpListener::bind(tcp_addr.clone()).await.unwrap();
 
@@ -77,5 +91,14 @@ impl<S: Store + Default> Service<S> {
                 });
             }
         }
+    }
+
+    fn get_cable(&self, cable_addr: &CableAddr) -> Option<&CableManager<S>> {
+        self.cables.get(cable_addr)
+    }
+
+    fn add_cable(&mut self, cable_addr: CableAddr) {
+        self.cables
+            .insert(cable_addr.to_vec(), CableManager::new(S::default()));
     }
 }
