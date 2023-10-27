@@ -5,13 +5,12 @@ use std::{
     rc::Rc,
 };
 
-use coven::service::{start_service, Client, Ping};
+use coven::{
+    service::{start_service, Client, Ping},
+    state::use_service_provider,
+};
 use dioxus::prelude::*;
 use dioxus_router::prelude::*;
-// use dioxus_signals;
-
-// TODO provide service as root context
-// - https://github.com/DioxusLabs/dioxus/pull/1193/files
 
 fn main() {
     dioxus_desktop::launch(App)
@@ -34,12 +33,8 @@ enum Route {
         },
 }
 
-fn use_client(cx: Scope) -> Client {
-    use_context::<Client>(cx).unwrap().clone()
-}
-
 fn App(cx: Scope) -> Element {
-    use_context_provider(cx, || start_service().unwrap());
+    use_service_provider(cx);
 
     render! {
         Router::<Route> {}
@@ -48,13 +43,6 @@ fn App(cx: Scope) -> Element {
 
 #[component]
 fn AppHome(cx: Scope) -> Element {
-    let client = use_client(cx);
-
-    use_future!(cx, || async move {
-        let res = client.rpc(Ping).await.unwrap();
-        println!("pong: {:?}", res);
-    });
-
     render! {
         div {
             "Home"
