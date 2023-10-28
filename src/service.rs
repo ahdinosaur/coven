@@ -1,12 +1,17 @@
 use async_std::net::{TcpListener, TcpStream};
+use cable::ChannelOptions;
 use cable_core::{CableManager, Store};
 use dioxus::prelude::UnboundedReceiver;
-use fermi::AtomRoot;
+use fermi::{AtomRoot, Readable};
 use futures_util::stream::StreamExt;
 use std::{collections::HashMap, rc::Rc};
+use tokio::task::AbortHandle;
+
+use crate::{state::CABAL_CHANNEL_POSTS, time};
 
 // type CableAddr = Vec<u8>;
 type TcpAddr = String;
+type ChannelId = String;
 
 pub enum Command {
     Connect {
@@ -17,11 +22,15 @@ pub enum Command {
         // cable_addr: CableAddr,
         tcp_addr: TcpAddr,
     },
+    OpenChannel {
+        // cable_addr: CableAddr,
+        channel_id: ChannelId,
+    },
 }
 
 pub async fn create_service<S: Store + Default>(
     mut rx: UnboundedReceiver<Command>,
-    _atoms: Rc<AtomRoot>,
+    atoms: Rc<AtomRoot>,
 ) {
     let mut service = Service::<S>::default();
 
@@ -35,14 +44,19 @@ pub async fn create_service<S: Store + Default>(
                 // cable_addr,
                 tcp_addr,
             } => service.handle_listen(/*cable_addr, */ tcp_addr).await,
+            Command::OpenChannel { channel_id } => {
+                service
+                    .handle_open_channel(atoms.clone(), /*cable_addr, */ channel_id)
+                    .await
+            }
         }
     }
 }
 
-#[derive(Clone)]
 struct Service<S: Store + Default> {
     // cables: HashMap<CableAddr, CableManager<S>>,
     cable: CableManager<S>,
+    channel_aborts: HashMap<ChannelId, AbortHandle>,
 }
 
 impl<S: Store + Default> Default for Service<S> {
@@ -50,6 +64,7 @@ impl<S: Store + Default> Default for Service<S> {
         Self {
             // cables: HashMap::new(),
             cable: CableManager::new(S::default()),
+            channel_aborts: HashMap::new(),
         }
     }
 }
@@ -95,6 +110,34 @@ impl<S: Store + Default> Service<S> {
         }
 
         // TODO: store a reference so we can un-listen later
+    }
+
+    async fn handle_open_channel(
+        &mut self,
+        atoms: Rc<AtomRoot>,
+        /*cable_addr: CableAddr, */ channel_id: ChannelId,
+    ) {
+        let opts = ChannelOptions {
+            channel: channel_id.clone(),
+            time_start: time::two_weeks_ago().unwrap(),
+            time_end: 0,
+            limit: 4096,
+        };
+
+        let mut cable = self.get_cable().unwrap().clone();
+        let subscription = tokio::task::spawn_local(async move {
+            let mut posts = Vec::new();
+            atoms.set((&CABAL_CHANNEL_POSTS).unique_id(), Some(posts.clone()));
+
+            let mut post_stream = cable.open_channel(&opts).await.unwrap();
+            while let Some(Ok(post)) = post_stream.next().await {
+                posts.push(post);
+                atoms.set((&CABAL_CHANNEL_POSTS).unique_id(), Some(posts.clone()));
+            }
+        });
+
+        self.channel_aborts
+            .insert(channel_id, subscription.abort_handle());
     }
 
     fn get_cable(&self /*, cable_addr: &CableAddr*/) -> Option<&CableManager<S>> {

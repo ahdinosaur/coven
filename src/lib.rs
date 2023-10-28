@@ -2,6 +2,7 @@
 
 pub mod service;
 pub mod state;
+pub mod time;
 
 use cable_core::MemoryStore;
 use dioxus::prelude::*;
