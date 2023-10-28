@@ -354,7 +354,7 @@ checksum = "a2bd12c1caf447e69cd4528f47f94d203fd2582878ecb9e9465484c4148a8223"
 [[package]]
 name = "cable"
 version = "1.1.0"
-source = "git+https://github.com/cabal-club/cable.rs#0bb5c308f3395b3b8f0ea43a239d06b37f0d5175"
+source = "git+https://github.com/ahdinosaur/cable.rs?branch=coven#2dfeabbb084a3308d69fddb9658e62c30f2baae2"
 dependencies = [
  "desert",
  "sodiumoxide",
@@ -363,7 +363,7 @@ dependencies = [
 [[package]]
 name = "cable_core"
 version = "1.1.0"
-source = "git+https://github.com/cabal-club/cable.rs#0bb5c308f3395b3b8f0ea43a239d06b37f0d5175"
+source = "git+https://github.com/ahdinosaur/cable.rs?branch=coven#2dfeabbb084a3308d69fddb9658e62c30f2baae2"
 dependencies = [
  "async-std",
  "async-trait",
@@ -694,7 +694,7 @@ dependencies = [
 [[package]]
 name = "desert"
 version = "2.0.1"
-source = "git+https://github.com/cabal-club/cable.rs#0bb5c308f3395b3b8f0ea43a239d06b37f0d5175"
+source = "git+https://github.com/ahdinosaur/cable.rs?branch=coven#2dfeabbb084a3308d69fddb9658e62c30f2baae2"
 
 [[package]]
 name = "digest"
@@ -1960,7 +1960,7 @@ checksum = "e2abad23fbc42b3700f2f279844dc832adb2b2eb069b2df918f455c4e18cc646"
 [[package]]
 name = "length-prefixed-stream"
 version = "1.0.0"
-source = "git+https://github.com/cabal-club/cable.rs#0bb5c308f3395b3b8f0ea43a239d06b37f0d5175"
+source = "git+https://github.com/ahdinosaur/cable.rs?branch=coven#2dfeabbb084a3308d69fddb9658e62c30f2baae2"
 dependencies = [
  "async-std",
  "desert",

@@ -8,8 +8,8 @@ edition = "2021"
 [dependencies]
 anyhow = "1.0.75"
 async-std = { version = "1.12.0", features = ["tokio1"] }
-cable = { git = "https://github.com/cabal-club/cable.rs" }
-cable_core = { git = "https://github.com/cabal-club/cable.rs" }
+cable = { git = "https://github.com/ahdinosaur/cable.rs", branch = "coven" }
+cable_core = { git = "https://github.com/ahdinosaur/cable.rs", branch = "coven" }
 dioxus = "0.4.0"
 dioxus-desktop = "0.4.0"
 dioxus-router = "0.4.1"
