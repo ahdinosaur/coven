@@ -1,6 +1,6 @@
-# coven 🧙
+# coven 🧙✨🔮
 
-An occult chat app using [Cabal](https://cabal.chat/) 🔮✨
+An occult chat app using [Cabal](https://cabal.chat/)
 
 ![An AI-generated image of the prompt "Watercolor drawing of a witch hat, glowing over a plain background."](https://i.imgur.com/jPwXOZrm.png)
 
