@@ -8,9 +8,12 @@ use cable_core::MemoryStore;
 use dioxus::prelude::*;
 use dioxus_router::prelude::*;
 use fermi::{use_init_atom_root, use_read, use_set};
+use state::Post;
 
 use crate::service::{create_service, Command};
-use crate::state::{ACTIVE_CABAL_CHANNEL_ID, ACTIVE_CABAL_ID, CABAL_CHANNEL_IDS, CABAL_IDS};
+use crate::state::{
+    ACTIVE_CABAL_CHANNEL_ID, ACTIVE_CABAL_ID, CABAL_CHANNEL_IDS, CABAL_CHANNEL_POSTS, CABAL_IDS,
+};
 
 #[derive(Routable, Clone)]
 #[rustfmt::skip]
@@ -100,13 +103,19 @@ fn CabalLayout(cx: Scope) -> Element {
                 to: Route::AppHomePage {},
                 "Home"
             },
-            CabalNavList { cabal_ids: cabal_ids.clone() },
-            if active_cabal_id.is_some() && channel_ids.is_some() {
-                rsx!(CabalChannelList {
+            div {
+                p { "Cabals:" }
+                CabalNavList { cabal_ids: cabal_ids.clone() }
+            }
+        }
+        if active_cabal_id.is_some() && channel_ids.is_some() {
+            rsx!(div {
+                p { "Channels:" }
+                CabalChannelList {
                     cabal_id: active_cabal_id.clone().unwrap(),
                     channel_ids: channel_ids.clone().unwrap(),
-                })
-            }
+                }
+            })
         }
         Outlet::<Route> {}
     }
@@ -156,7 +165,7 @@ fn CabalHomePage(cx: Scope, cabal_id: String) -> Element {
     render! {
         div {
             h1 {
-                "{cabal_id}"
+                "Cabal: {cabal_id}"
             }
         }
     }
@@ -167,9 +176,38 @@ fn CabalChannelPage(cx: Scope, cabal_id: String, channel_id: String) -> Element 
     use_active_cabal_id(cx, cabal_id.into());
     use_active_channel_id(cx, channel_id.into());
 
+    let service = use_coroutine_handle::<Command>(cx)?;
+
+    service.send(Command::OpenChannel {
+        channel_id: channel_id.clone(),
+    });
+
+    let posts = use_read(cx, &CABAL_CHANNEL_POSTS);
+
     render! {
         div {
-            "Cabal Channel"
+            h1 {
+                "Channel: {channel_id}"
+            },
+
+            if let Some(posts) = posts {
+                rsx!(ChannelPosts {
+                    posts: posts.clone()
+                })
+            }
+        }
+    }
+}
+
+#[inline_props]
+fn ChannelPosts(cx: Scope, posts: Vec<Post>) -> Element {
+    render! {
+        ul {
+            for post in posts {
+                li {
+                    "{post.text}"
+                }
+            }
         }
     }
 }

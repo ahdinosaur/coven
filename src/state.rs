@@ -5,15 +5,18 @@ pub type CabalId = String;
 pub type ChannelId = String;
 
 pub type PeerNick = String;
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Peer {
     pub key: PublicKey,
     pub name: PeerNick,
 }
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct MyPeer {
     pub keypair: Keypair,
     pub name: PeerNick,
 }
 
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Post {
     pub text: String,
 }

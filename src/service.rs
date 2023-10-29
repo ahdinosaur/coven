@@ -1,5 +1,5 @@
 use async_std::net::{TcpListener, TcpStream};
-use cable::ChannelOptions;
+use cable::{post::PostBody, ChannelOptions};
 use cable_core::{CableManager, Store};
 use dioxus::prelude::UnboundedReceiver;
 use fermi::{AtomRoot, Readable};
@@ -7,7 +7,10 @@ use futures_util::stream::StreamExt;
 use std::{collections::HashMap, rc::Rc};
 use tokio::task::AbortHandle;
 
-use crate::{state::CABAL_CHANNEL_POSTS, time};
+use crate::{
+    state::{Post, CABAL_CHANNEL_POSTS},
+    time,
+};
 
 // type CableAddr = Vec<u8>;
 type TcpAddr = String;
@@ -72,6 +75,7 @@ impl<S: Store + Default> Default for Service<S> {
 impl<S: Store + Default> Service<S> {
     async fn handle_connect(&self, /*cable_addr: CableAddr, */ tcp_addr: TcpAddr) {
         let cable = self.get_cable(/*&cable_addr*/).unwrap().clone();
+
         tokio::spawn(async move {
             let stream = match TcpStream::connect(&tcp_addr).await {
                 Ok(stream) => stream,
@@ -89,25 +93,27 @@ impl<S: Store + Default> Service<S> {
     }
 
     async fn handle_listen(&mut self, /*cable_addr: CableAddr, */ mut tcp_addr: TcpAddr) {
-        let cable = self.get_cable(/*&cable_addr*/).unwrap();
-
         if !tcp_addr.contains(':') {
             tcp_addr = format!("0.0.0.0:{}", tcp_addr);
         }
 
-        let listener = TcpListener::bind(tcp_addr.clone()).await.unwrap();
+        let cable = self.get_cable(/*&cable_addr*/).unwrap().clone();
 
-        let mut incoming = listener.incoming();
-        while let Some(stream) = incoming.next().await {
-            if let Ok(stream) = stream {
-                let cable = cable.clone();
-                tokio::spawn(async move {
-                    if let Err(err) = cable.listen(stream).await {
-                        println!("Cable stream listener error: {}", err);
-                    }
-                });
+        tokio::spawn(async move {
+            let listener = TcpListener::bind(tcp_addr.clone()).await.unwrap();
+
+            let mut incoming = listener.incoming();
+            while let Some(stream) = incoming.next().await {
+                if let Ok(stream) = stream {
+                    let cable = cable.clone();
+                    tokio::spawn(async move {
+                        if let Err(err) = cable.listen(stream).await {
+                            println!("Cable stream listener error: {}", err);
+                        }
+                    });
+                }
             }
-        }
+        });
 
         // TODO: store a reference so we can un-listen later
     }
@@ -126,13 +132,17 @@ impl<S: Store + Default> Service<S> {
 
         let mut cable = self.get_cable().unwrap().clone();
         let subscription = tokio::task::spawn_local(async move {
-            let mut posts = Vec::new();
+            println!("two");
+            let mut posts: Vec<Post> = Vec::new();
             atoms.set((&CABAL_CHANNEL_POSTS).unique_id(), Some(posts.clone()));
 
             let mut post_stream = cable.open_channel(&opts).await.unwrap();
             while let Some(Ok(post)) = post_stream.next().await {
-                posts.push(post);
-                atoms.set((&CABAL_CHANNEL_POSTS).unique_id(), Some(posts.clone()));
+                println!("post: {}", post);
+                if let PostBody::Text { channel: _, text } = post.body {
+                    posts.push(Post { text });
+                    atoms.set((&CABAL_CHANNEL_POSTS).unique_id(), Some(posts.clone()));
+                }
             }
         });
 

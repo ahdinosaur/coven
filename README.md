@@ -4,7 +4,22 @@ An occult chat app using [Cabal](https://cabal.chat/)
 
 ![An AI-generated image of the prompt "Watercolor drawing of a witch hat, glowing over a plain background."](https://i.imgur.com/jPwXOZrm.png)
 
+Uses the [cable.rs](https://github.com/cabal-club/cable.rs) implementation of the new [Cable protocol](https://github.com/cabal-club/cable).
+
 For now is a desktop app, but with the magic of [Dioxus](https://dioxuslabs.com/) may also become a mobile app, a web app, and a terminal app.
+
+**Status**: Pre-Alpha (Work in progress, expect changes)
+
+## Usage
+
+Clone, build, and run `coven`:
+
+```shell
+git clone git@github.com:ahdinosaur/coven.git
+cd coven
+cargo build --release
+./target/release/coven
+```
 
 ## Develop
 
