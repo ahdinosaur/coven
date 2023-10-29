@@ -2,6 +2,41 @@
 
 An occult chat app using [Cabal](https://cabal.chat/) 🔮✨
 
+![An AI-generated image of the prompt "Watercolor drawing of a witch hat, glowing over a plain background."](https://imgur.com/jPwXOZr)
+
+For now is a desktop app, but with the magic of [Dioxus](https://dioxuslabs.com/) may also become a mobile app, a web app, and a terminal app.
+
+## Develop
+
+### Pre-requisites
+
+https://beta.tauri.app/guides/prerequisites/
+
+#### Linux
+
+```shell
+sudo apt update
+sudo apt install libwebkit2gtk-4.1-dev \
+  build-essential \
+  curl \
+  wget \
+  file \
+  libssl-dev \
+  libgtk-3-dev \
+  libayatana-appindicator3-dev \
+  librsvg2-dev
+```
+
+### Run
+
+with [`just`](https://github.com/casey/just) installed:
+
+```shell
+just dev
+```
+
+(If that doesn't work, fallback to `cargo run`.)
+
 ## TODO
 
 ### features
@@ -36,32 +71,3 @@ from https://github.com/nikolaiwarner/react-cabal/issues/1
 * [ ]  can add/modify a custom theme
 * [ ]  global keyboard commands
 * [ ]  generate qr code for sharing
-
-## dev
-
-### pre-reqs
-
-https://beta.tauri.app/guides/prerequisites/
-
-#### linux
-
-```shell
-sudo apt update
-sudo apt install libwebkit2gtk-4.1-dev \
-  build-essential \
-  curl \
-  wget \
-  file \
-  libssl-dev \
-  libgtk-3-dev \
-  libayatana-appindicator3-dev \
-  librsvg2-dev
-```
-
-### dev
-
-with `just` installed:
-
-```shell
-just dev
-```
