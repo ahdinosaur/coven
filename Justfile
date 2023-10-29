@@ -1,2 +1,2 @@
 dev:
-  dx serve --hot-reload --platform desktop
+  dx serve --hot-reload
