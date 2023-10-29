@@ -2,7 +2,7 @@
 
 An occult chat app using [Cabal](https://cabal.chat/) 🔮✨
 
-![An AI-generated image of the prompt "Watercolor drawing of a witch hat, glowing over a plain background."](https://imgur.com/jPwXOZr)
+![An AI-generated image of the prompt "Watercolor drawing of a witch hat, glowing over a plain background."](https://i.imgur.com/jPwXOZrm.png)
 
 For now is a desktop app, but with the magic of [Dioxus](https://dioxuslabs.com/) may also become a mobile app, a web app, and a terminal app.
 
