@@ -7,10 +7,10 @@ pub mod time;
 use cable_core::MemoryStore;
 use dioxus::prelude::*;
 use dioxus_router::prelude::*;
-use fermi::{use_init_atom_root, use_read, use_set};
-use state::Post;
+use fermi::{use_atom_root, use_init_atom_root, use_read, use_set};
 
-use crate::service::{create_service, Command};
+use crate::service::Service;
+use crate::state::Post;
 use crate::state::{
     ACTIVE_CABAL_CHANNEL_ID, ACTIVE_CABAL_ID, CABAL_CHANNEL_IDS, CABAL_CHANNEL_POSTS, CABAL_IDS,
 };
@@ -35,12 +35,23 @@ enum Route {
                 },
 }
 
-pub fn App(cx: Scope) -> Element {
-    let atoms = use_init_atom_root(cx);
-    let service = use_coroutine(cx, |rx| create_service::<MemoryStore>(rx, atoms.clone()));
+type Store = MemoryStore;
 
-    service.send(Command::Listen {
-        tcp_addr: "1337".into(),
+fn use_service(cx: &ScopeState) -> Service<Store> {
+    use_context::<Service<Store>>(cx).unwrap().clone()
+}
+
+fn use_service_provider(cx: &ScopeState) {
+    use_context_provider(cx, || Service::<Store>::default());
+}
+
+pub fn App(cx: Scope) -> Element {
+    use_service_provider(cx);
+    use_init_atom_root(cx);
+
+    let mut service = use_service(cx);
+    use_coroutine(cx, |_rx: UnboundedReceiver<()>| async move {
+        service.listen("1337".into()).await
     });
 
     render! {
@@ -176,10 +187,11 @@ fn CabalChannelPage(cx: Scope, cabal_id: String, channel_id: String) -> Element 
     use_active_cabal_id(cx, cabal_id.into());
     use_active_channel_id(cx, channel_id.into());
 
-    let service = use_coroutine_handle::<Command>(cx)?;
-
-    service.send(Command::OpenChannel {
-        channel_id: channel_id.clone(),
+    let service = use_service(cx);
+    let atoms = use_atom_root(cx);
+    use_coroutine(cx, |_rx: UnboundedReceiver<()>| {
+        to_owned![service, atoms, channel_id];
+        async move { service.open_channel(atoms, channel_id).await }
     });
 
     let posts = use_read(cx, &CABAL_CHANNEL_POSTS);
