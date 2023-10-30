@@ -3,7 +3,7 @@ use dioxus_router::prelude::*;
 use fermi::use_read;
 
 use crate::{
-    components::{CabalContainer, ChannelsNav},
+    components::ChannelsNav,
     pages::Route,
     state::{ACTIVE_CABAL_CHANNEL_ID, ACTIVE_CABAL_ID, CABAL_CHANNEL_IDS},
 };
@@ -17,11 +17,11 @@ pub(crate) fn CabalLayout(cx: Scope) -> Element {
     let active_channel_label = active_channel_id.clone().unwrap_or("".into());
 
     render! {
-        CabalContainer {
-            top: render!(h2 {
+        div {
+            h2 {
                 "{active_channel_label}"
-            }),
-            side: render!(Fragment {
+            }
+            Fragment {
                 if active_cabal_id.is_some() && channel_ids.is_some() {
                     rsx!(nav {
                         ChannelsNav {
@@ -30,8 +30,8 @@ pub(crate) fn CabalLayout(cx: Scope) -> Element {
                         }
                     })
                 }
-            }),
-            content: render!(Outlet::<Route> {}),
+            }
+            Outlet::<Route> {}
         }
     }
 }

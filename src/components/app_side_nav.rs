@@ -1,18 +1,28 @@
 use dioxus::prelude::*;
+use dioxus_daisyui::prelude::*;
 use dioxus_router::prelude::*;
+use fermi::use_read;
 
-use crate::pages::Route;
+use crate::{
+    pages::Route,
+    state::{ACTIVE_CABAL_ID, CABAL_IDS},
+};
 
 #[inline_props]
-pub(crate) fn CabalsNav(cx: Scope, cabal_ids: Vec<String>) -> Element {
+pub(crate) fn AppSideNav(cx: Scope) -> Element {
+    let cabal_ids = use_read(cx, &CABAL_IDS);
+    let _active_cabal_id = use_read(cx, &ACTIVE_CABAL_ID);
+
     render! {
         nav {
-            p {
-                id: "cabals-nav-label",
-                "Cabals:"
-            }
+            class: class!(navbar flex_col),
+
+            Link {
+                to: Route::AppHomePage {},
+                "Coven"
+            },
             ul {
-                aria_labelledby: "cabals-nav-label",
+                aria_label: "Cabals",
                 for cabal_id in cabal_ids {
                     li {
                         key: "{cabal_id}",

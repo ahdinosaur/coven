@@ -1,0 +1,13 @@
+{
+  "name": "coven",
+  "private": true,
+  "description": "An occult chat app using [Cabal](https://cabal.chat/)",
+  "scripts": {
+    "tailwind": "tailwindcss -i ./src/index.css -o ./public/tailwind.css",
+    "tailwind:watch": "npm run tailwind -- --watch"
+  },
+  "devDependencies": {
+    "daisyui": "^3.9.4",
+    "tailwindcss": "^3.3.5"
+  }
+}
