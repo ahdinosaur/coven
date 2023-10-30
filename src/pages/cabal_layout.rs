@@ -3,7 +3,7 @@ use dioxus_router::prelude::*;
 use fermi::use_read;
 
 use crate::{
-    components::CabalChannelList,
+    components::{CabalContainer, ChannelsNav},
     pages::Route,
     state::{ACTIVE_CABAL_CHANNEL_ID, ACTIVE_CABAL_ID, CABAL_CHANNEL_IDS},
 };
@@ -12,18 +12,26 @@ use crate::{
 pub(crate) fn CabalLayout(cx: Scope) -> Element {
     let active_cabal_id = use_read(cx, &ACTIVE_CABAL_ID);
     let channel_ids = use_read(cx, &CABAL_CHANNEL_IDS);
-    let _active_channel_id = use_read(cx, &ACTIVE_CABAL_CHANNEL_ID);
+    let active_channel_id = use_read(cx, &ACTIVE_CABAL_CHANNEL_ID);
+
+    let active_channel_label = active_channel_id.clone().unwrap_or("".into());
 
     render! {
-        if active_cabal_id.is_some() && channel_ids.is_some() {
-            rsx!(nav {
-                p { "Channels:" }
-                CabalChannelList {
-                    cabal_id: active_cabal_id.clone().unwrap(),
-                    channel_ids: channel_ids.clone().unwrap(),
+        CabalContainer {
+            top: render!(h2 {
+                "{active_channel_label}"
+            }),
+            side: render!(Fragment {
+                if active_cabal_id.is_some() && channel_ids.is_some() {
+                    rsx!(nav {
+                        ChannelsNav {
+                            cabal_id: active_cabal_id.clone().unwrap(),
+                            channel_ids: channel_ids.clone().unwrap(),
+                        }
+                    })
                 }
-            })
+            }),
+            content: render!(Outlet::<Route> {}),
         }
-        Outlet::<Route> {}
     }
 }

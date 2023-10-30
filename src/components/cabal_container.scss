@@ -1,0 +1,18 @@
+.component {
+  display: flex;
+  flex-direction: column;
+
+  > .top {
+  }
+
+  > .bottom {
+    display: flex;
+    flex-direction: row;
+
+    > .side {
+    }
+
+    > .content {
+    }
+  }
+}

@@ -3,7 +3,7 @@ use dioxus_router::prelude::*;
 use fermi::use_read;
 
 use crate::{
-    components::{AppContainer, AppNav},
+    components::{AppContainer, AppTopNav, CabalsNav},
     pages::Route,
     state::{ACTIVE_CABAL_ID, CABAL_IDS},
 };
@@ -15,10 +15,11 @@ pub(crate) fn AppLayout(cx: Scope) -> Element {
 
     render! {
         AppContainer {
-            nav: render!(AppNav {
+            top: render!(AppTopNav {}),
+            side: render!(CabalsNav {
                 cabal_ids: cabal_ids.clone()
             }),
-            main: render!(Outlet::<Route> {}),
+            content: render!(Outlet::<Route> {}),
         }
     }
 }

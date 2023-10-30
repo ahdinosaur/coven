@@ -1,9 +1,9 @@
 use dioxus::prelude::*;
 
-turf::style_sheet!("src/components/app_container.scss");
+turf::style_sheet!("src/components/cabal_container.scss");
 
 #[inline_props]
-pub(crate) fn AppContainer<'a>(
+pub(crate) fn CabalContainer<'a>(
     cx: Scope,
     top: Element<'a>,
     side: Element<'a>,
@@ -15,19 +15,19 @@ pub(crate) fn AppContainer<'a>(
             class: ClassName::COMPONENT,
 
             div {
-                class: ClassName::TOP,
+                class: "top",
                 &cx.props.top
             }
 
             div {
-                class: ClassName::BOTTOM,
+                class: "bottom",
 
                 div {
-                    class: ClassName::SIDE,
+                    class: "side",
                     &cx.props.side
                 }
                 div {
-                    class: ClassName::CONTENT,
+                    class: "content",
                     &cx.props.content
                 }
             }

@@ -4,14 +4,15 @@ use dioxus_router::prelude::*;
 use crate::pages::Route;
 
 #[inline_props]
-pub(crate) fn AppNav(cx: Scope, cabal_ids: Vec<String>) -> Element {
+pub(crate) fn CabalsNav(cx: Scope, cabal_ids: Vec<String>) -> Element {
     render! {
         nav {
-            Link {
-                to: Route::AppHomePage {},
-                "Home"
-            },
+            p {
+                id: "cabals-nav-label",
+                "Cabals:"
+            }
             ul {
+                aria_labelledby: "cabals-nav-label",
                 for cabal_id in cabal_ids {
                     li {
                         key: "{cabal_id}",
