@@ -20,3 +20,10 @@ futures-util = "0.3.29"
 nest = "1.0.0"
 tokio = "1.33.0"
 turf = "0.7.0"
+
+[package.metadata.turf]
+minify = false
+load_paths = ["src/styles"]
+
+[package.metadata.turf.file_output]
+global_css_file_path = "src/styles.css"
