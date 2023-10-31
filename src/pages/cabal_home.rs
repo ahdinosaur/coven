@@ -1,4 +1,5 @@
 use dioxus::prelude::*;
+use dioxus_daisyui::prelude::*;
 
 use crate::hooks::use_active_cabal_id;
 
@@ -8,8 +9,16 @@ pub(crate) fn CabalHomePage(cx: Scope, cabal_id: String) -> Element {
 
     render! {
         div {
-            h1 {
-                "Cabal: {cabal_id}"
+            class: class!(hero min_h_screen bg_base_200),
+            div {
+                class: class!(hero_content text_center),
+                div {
+                    class: class!(max_w_md),
+                    h1 {
+                        class: class!(text_5xl font_bold),
+                        "Cabal: {cabal_id}"
+                    }
+                }
             }
         }
     }
