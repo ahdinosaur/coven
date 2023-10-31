@@ -9,7 +9,7 @@ pub(crate) fn CabalHomePage(cx: Scope, cabal_id: String) -> Element {
 
     render! {
         div {
-            class: class!(hero min_h_screen bg_base_200),
+            class: class!(hero grow min_h_screen bg_base_200),
             div {
                 class: class!(hero_content text_center),
                 div {

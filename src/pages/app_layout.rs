@@ -19,7 +19,7 @@ pub(crate) fn AppLayout(cx: Scope) -> Element {
 
     render! {
         div {
-            class: class!(flex flex_row),
+            class: class!(flex flex_row gap_2 min_w_full),
 
             AppSideNav {},
 

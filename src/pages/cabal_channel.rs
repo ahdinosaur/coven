@@ -1,4 +1,5 @@
 use dioxus::prelude::*;
+use dioxus_daisyui::prelude::*;
 use fermi::{use_atom_root, use_read};
 
 use crate::{
@@ -23,9 +24,17 @@ pub(crate) fn CabalChannelPage(cx: Scope, cabal_id: String, channel_id: String) 
 
     render! {
         div {
-            h1 {
-                "Channel: {channel_id}"
-            },
+            class: class!(grow min_h_screen bg_base_200),
+            div {
+                class: class!(text_center),
+                div {
+                    class: class!(max_w_md),
+                    h1 {
+                        class: class!(text_5xl font_bold),
+                        "Channel: {channel_id}"
+                    }
+                }
+            }
 
             if let Some(posts) = posts {
                 rsx!(ChannelPosts {

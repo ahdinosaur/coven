@@ -5,7 +5,7 @@ use dioxus_daisyui::prelude::*;
 pub(crate) fn AppHomePage(cx: Scope) -> Element {
     render! {
         div {
-            class: class!(hero min_h_screen bg_base_200),
+            class: class!(hero grow min_h_screen bg_base_200),
             div {
                 class: class!(hero_content text_center),
                 div {
