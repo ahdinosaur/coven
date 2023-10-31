@@ -17,6 +17,7 @@ Clone, build, and run `coven`:
 ```shell
 git clone git@github.com:ahdinosaur/coven.git
 cd coven
+curl 'https://cdn.jsdelivr.net/npm/daisyui@3.9.4/dist/full.css' > 'public/daisyui.css'
 cargo build --release
 ./target/release/coven
 ```

@@ -754,8 +754,7 @@ dependencies = [
 [[package]]
 name = "dioxus-class"
 version = "0.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3dde58998ffbc87c0e797200a6d3e7593edf2979d96d9c05c52d33a5b44bef3a"
+source = "git+https://github.com/ahdinosaur/dioxus-class?branch=patch-1#dd3fdf0ad05aaf8bad58bf3e03f90b6bac93a62a"
 dependencies = [
  "dioxus",
  "paste",
@@ -793,8 +792,7 @@ dependencies = [
 [[package]]
 name = "dioxus-daisyui"
 version = "0.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e454ecdc6091341abbccc2b418676e51b8a435cece9cf7c5d826bf596765413d"
+source = "git+https://github.com/ahdinosaur/dioxus-class?branch=patch-1#dd3fdf0ad05aaf8bad58bf3e03f90b6bac93a62a"
 dependencies = [
  "dioxus",
  "dioxus-tailwindcss",
@@ -938,8 +936,7 @@ dependencies = [
 [[package]]
 name = "dioxus-tailwindcss"
 version = "0.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5818f21c1847f505b4f7831f9cb6508451eb3d35aefc806a455ac8501ad2a70e"
+source = "git+https://github.com/ahdinosaur/dioxus-class?branch=patch-1#dd3fdf0ad05aaf8bad58bf3e03f90b6bac93a62a"
 dependencies = [
  "dioxus",
  "dioxus-class",
