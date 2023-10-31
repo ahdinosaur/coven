@@ -12,12 +12,15 @@ For now is a desktop app, but with the magic of [Dioxus](https://dioxuslabs.com/
 
 ## Usage
 
+(With `Rust` and `Node.js` both installed)
+
 Clone, build, and run `coven`:
 
 ```shell
 git clone git@github.com:ahdinosaur/coven.git
 cd coven
-curl 'https://cdn.jsdelivr.net/npm/daisyui@3.9.4/dist/full.css' > 'public/daisyui.css'
+npm install
+npm run tailwind
 cargo build --release
 ./target/release/coven
 ```
